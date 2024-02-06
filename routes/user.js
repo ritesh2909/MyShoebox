@@ -1,9 +1,9 @@
 const express = require("express");
-const { getUserById } = require("../controller/user");
+const userController = require("../controller/user");
+const { verifyToken } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
-router.get("/:id", getUserById);
-// router.delete('/:id',deleteUserById);
-// router.patch('/:id', updateUserById);
-
+router.put("/edit-user", verifyToken, userController.updateUser);
+router.post("/forgot-password", userController.forgotPasswordOtp);
+router.get("/:id", userController.getAUser);
 exports.router = router;

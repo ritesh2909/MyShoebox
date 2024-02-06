@@ -1,0 +1,161 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Ecom backend",
+    "version": "version not set"
+  },
+  "schemes": ["http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/api/products": {
+      "get": {
+        "parameters": [
+          {
+            "name": "productId",
+            "description": "productId",
+            "in": "query"
+          }
+        ],
+        "tags": ["Products"],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/GETProductsList"
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/signin": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Authenticate user and get OTP",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Mobile number for authentication",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AuthRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OTP successfully sent"
+          }
+        }
+      }
+    },
+    "/api/products/products": {
+      "post": {
+        "tags": ["Products"],
+        "summary": "Get products using filter",
+        "parameters": [
+          {
+            "name": "filterParams",
+            "in": "body",
+            "description": "Filter parameters",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProductFilterParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products using filters"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "GETProductsList": {
+      "properties": {
+        "totalCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "brand": {
+                "type": "string"
+              },
+              "category": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "gender": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "productId": {
+                "type": "string"
+              },
+              "__v": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        }
+      }
+    },
+    "AuthRequest": {
+      "type": "object",
+      "properties": {
+        "mobile": {
+          "type": "string",
+          "description": "User's mobile number for authentication"
+        }
+      }
+    },
+    "ProductFilterParams": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "brands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "gender": {
+          "type": "number"
+        }
+      },
+      "required": ["categories", "brands", "colors"]
+    }
+  }
+}
