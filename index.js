@@ -13,6 +13,7 @@ const cartRoute = require("./routes/cart");
 const wishListRoute = require("./routes/wishlist");
 const paymentRouter = require("./routes/payment");
 const { connectDB } = require("./config/dbconnection");
+const {limiter} =  require("./config/ratelimit")
 
 const cors = require("cors");
 const server = express();
@@ -26,6 +27,7 @@ server.use(express.json());
 server.use(cors());
 server.use(bodyParser.json());
 server.use(cookieParser());
+server.use(limiter)
 
 // DB Connection
 connectDB();
