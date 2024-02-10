@@ -4,7 +4,7 @@
     "title": "Ecom backend",
     "version": "version not set"
   },
-  "schemes": ["http"],
+  "schemes": ["http","https"],
   "consumes": ["application/json"],
   "produces": ["application/json"],
   "paths": {
