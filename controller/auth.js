@@ -166,7 +166,7 @@ exports.requestOtp = async (req, res) => {
       const otpBody = `${otpGenerated} is your OTP to login to ShoezBazaar. DO NOT share otp with anyone. SHOEZBAZAAR never ask for OTP. This otp expires in 10 mins.`;
       try {
         // sendOTP(otpBody, mobile);  uncomment this to start otp service
-        return res.status(204).json("OTP Sent Successfully!");
+        return res.status(204).json("OTP Sent Successfuly!");
       } catch (error) {
         console.log(error);
       }
