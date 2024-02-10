@@ -13,6 +13,7 @@ const authRoute = require("./routes/auth");
 const cartRoute = require("./routes/cart");
 const wishListRoute = require("./routes/wishlist");
 const paymentRouter = require("./routes/payment");
+const { connectDB } = require("./config/dbconnection");
 
 const cors = require("cors");
 const server = express();
@@ -28,7 +29,7 @@ server.use(bodyParser.json());
 server.use(cookieParser());
 
 // DB Connection
-mongoose.connect(process.env.MONGO_URL).then(console.log("DB connected"));
+connectDB();
 
 // Serve Swagger UI at /api-docs
 server.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
