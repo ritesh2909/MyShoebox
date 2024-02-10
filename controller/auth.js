@@ -1,6 +1,7 @@
 const { generateToken } = require("../config/jwtToken");
 const { User } = require("../model/User");
 const jwt = require("jsonwebtoken");
+const { sendOTP } = require("../config/sendOtp");
 const { newOtp } = require("../config/generateOtp");
 const moment = require("moment");
 const bcrypt = require("bcrypt");
