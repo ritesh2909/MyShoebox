@@ -1,28 +1,23 @@
-pipeline{
-    agent any
-    tools {nodejs "Node"}
-    stages {
-        stage('Clone Repository'){
-            steps{
-                git branch: 'main',
-                    url: 'https://github.com/ritesh2909/MyShoebox.git'
-            }
-        }
-        
-        stage('Install Dependencies'){
-            steps {
-                bat 'npm install'
-            }
-        }
-         stage('Install pm2'){
-            steps {
-                bat 'npm install pm2 -g'
-            }
-        }
-        
-        stage('Deploy'){
-            steps {
-                bat 'pm2 startOrRestart pm2.config.json'
-            }
-        }
-    }
+# Use the official Node.js image as base
+FROM node:14
+
+# Set the working directory
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json to the working directory
+COPY backend/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application code
+COPY backend ./
+
+# Build the TypeScript code
+RUN npm run build
+
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Command to run the application
+CMD ["npm", "start"]

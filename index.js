@@ -11,7 +11,7 @@ const userRouter = require("./routes/user");
 const authRoute = require("./routes/auth");
 const cartRoute = require("./routes/cart");
 const wishListRoute = require("./routes/wishlist");
-const paymentRouter = require("./routes/payment");
+const paymentRoute = require("./routes/payment");
 const { connectDB } = require("./config/dbconnection");
 const {limiter} =  require("./config/ratelimit")
 
@@ -42,7 +42,8 @@ server.use("/api/user", userRouter.router);
 server.use("/api/auth", authRoute.router);
 server.use("/api/wishlist", wishListRoute.router);
 server.use("/api/cart", cartRoute.router);
-server.use("/api/payment", paymentRouter.router);
+server.use("/api/payment", paymentRoute.router);
+// server.use("/api/coupon", couponRoute.router)
 
 server.listen(process.env.PORT, () => {
   console.log(`Server running on ${process.env.PORT}`);
