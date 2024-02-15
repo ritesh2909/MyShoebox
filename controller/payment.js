@@ -18,14 +18,26 @@ exports.createPayment = async (req, res) => {
     };
     stripeLineItems.push(stripeLineItem);
   }
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: stripeLineItems,
-    mode: "payment",
-    success_url: "http://localhost:5173/success",
-    cancel_url: "http://localhost:5173/cancel",
-  });
-  res.json({ id: session.id });
+  const environment = process.env.ENVIRONMENT;
+  if (environment == "prod") {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: stripeLineItems,
+      mode: "payment",
+      success_url: process.env.PROD_URL + "/success",
+      cancel_url: process.env.PROD_URL + "/cancel",
+    });
+    res.json({ id: session.id });
+  } else {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: stripeLineItems,
+      mode: "payment",
+      success_url: process.env.DEV_URL + "/success",
+      cancel_url: process.env.DEV_URL + "/cancel",
+    });
+    res.json({ id: session.id });
+  }
 };
 // {
 //   name,
