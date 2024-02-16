@@ -448,7 +448,13 @@ exports.getProductsUsingFilters = async (req, res) => {
   let pipeline = [];
 
   if (brands && brands.length > 0) {
-    const brandIds = brands.map((id) => new ObjectId(id));
+    const brandIds = brands.map((id) => {
+      if (Number.isNaN(Number(id))) {
+        return res.status(400).json("Invalid brandId");
+      }
+      return new ObjectId(id);
+    });
+
     pipeline.push({
       $match: {
         brand: { $in: brandIds },
@@ -465,6 +471,11 @@ exports.getProductsUsingFilters = async (req, res) => {
   }
 
   if (categories && categories.length > 0) {
+    for(let i of categories) {
+      if (Number.isNaN(Number(i))) {
+        return res.status(400).json("Invalid brandId");
+      }
+    }
     pipeline.push({
       $match: {
         category: { $in: categories },

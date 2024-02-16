@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-
+const logger = require('morgan'); 
 // routes
 const productRoute = require("./routes/product");
 const brandRoute = require("./routes/brand");
@@ -28,6 +28,7 @@ server.use(cors());
 server.use(bodyParser.json());
 server.use(cookieParser());
 server.use(limiter)
+server.use(logger('dev')); 
 
 // DB Connection
 connectDB();
