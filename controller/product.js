@@ -1,4 +1,4 @@
-const { Product } = require("../model/Product");
+const { Product, ProductGenderEnum } = require("../model/Product");
 const { ProductInfo } = require("../model/ProductInfo");
 const slugify = require("slugify");
 const { validateMongoDbId } = require("../utils/validateMongoId");
@@ -408,10 +408,16 @@ const colorPipeline = [
   },
 ];
 
+
+
 exports.getProductFilters = async (req, res) => {
   try {
     // gender TODO for category and brand
-    const genders = ["Men", "Women", "Boys", "Girls"];
+    let genders = [];
+    for (let key in ProductGenderEnum) {
+      genders.push(key)
+    }
+
     const categories = await Product.aggregate(categoryPipeline);
     const brands = await Product.aggregate(brandPipeline);
     const colors = await ProductInfo.aggregate(colorPipeline);
@@ -443,15 +449,13 @@ exports.getProductFilters = async (req, res) => {
 };
 
 exports.getProductsUsingFilters = async (req, res) => {
+  // supposing gender will always be single 
   const { categories, brands, colors, gender } = req.body;
 
   let pipeline = [];
 
   if (brands && brands.length > 0) {
     const brandIds = brands.map((id) => {
-      if (Number.isNaN(Number(id))) {
-        return res.status(400).json("Invalid brandId");
-      }
       return new ObjectId(id);
     });
 
@@ -465,17 +469,12 @@ exports.getProductsUsingFilters = async (req, res) => {
   if (gender) {
     pipeline.push({
       $match: {
-        gender: gender,
+        gender: ProductGenderEnum[gender],
       },
     });
   }
 
   if (categories && categories.length > 0) {
-    for(let i of categories) {
-      if (Number.isNaN(Number(i))) {
-        return res.status(400).json("Invalid brandId");
-      }
-    }
     pipeline.push({
       $match: {
         category: { $in: categories },
