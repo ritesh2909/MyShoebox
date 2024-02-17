@@ -5,6 +5,7 @@ const { validateMongoDbId } = require("../utils/validateMongoId");
 const { Category } = require("../model/Category");
 const { Brand } = require("../model/Brand");
 const { ObjectId } = require("mongodb");
+const { sortingOptions } = require("../utils/utils");
 
 // api to add new products
 exports.addProduct = async (req, res) => {
@@ -448,9 +449,28 @@ exports.getProductFilters = async (req, res) => {
   }
 };
 
+const sortBasedOnSortingOption = (products, sortingOption) => {
+  if (!sortingOption) return products;
+  console.log(sortingOption)
+  switch (sortingOption) {
+    case Object.keys(sortingOptions).find(key => sortingOptions[key] === sortingOptions.PriceHighToLow):
+      products.sort((a, b) => b.discountPrice - a.discountPrice);
+      break;
+    case Object.keys(sortingOptions).find(key => sortingOptions[key] === sortingOptions.PriceLowToHigh):
+      products.sort((a,b)=> a.discountPrice - b.discountPrice)
+    default:
+      console.log("default case")
+  }
+
+  return products;
+}
+
 exports.getProductsUsingFilters = async (req, res) => {
   // supposing gender will always be single 
-  const { categories, brands, colors, gender } = req.body;
+  let { categories, brands, colors, gender, sortingOption } = req.body;
+  if (!sortingOption) {
+    sortingOption = sortingOptions.Recommended;
+  }
 
   let pipeline = [];
 
@@ -521,6 +541,10 @@ exports.getProductsUsingFilters = async (req, res) => {
         }
       }
       result = response;
+    }
+
+    if (sortingOption) {
+      result = sortBasedOnSortingOption(result, sortingOption);
     }
 
     return res.status(200).json(result);
