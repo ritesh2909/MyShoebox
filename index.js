@@ -3,6 +3,9 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 
+
+const swaggerUi = require("swagger-ui-express");
+const swaggerOptions = require("./swagger.json");
 // routes
 const productRoute = require("./routes/product");
 const brandRoute = require("./routes/brand");
@@ -18,16 +21,17 @@ const {limiter} =  require("./config/ratelimit")
 const cors = require("cors");
 const server = express();
 
-const swaggerUi = require("swagger-ui-express");
-const swaggerOptions = require("./swagger.json");
 
 dotenv.config();
-
+// server.use((req, res, next) => {
+//   console.log(`${req.method} ${req.originalUrl}`);
+//   next();
+// });
 server.use(express.json());
 server.use(cors());
 server.use(bodyParser.json());
 server.use(cookieParser());
-server.use(limiter)
+// server.use(limiter)
 
 // DB Connection
 connectDB();
