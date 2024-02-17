@@ -15,6 +15,9 @@ const authRoute = require("./routes/auth");
 const cartRoute = require("./routes/cart");
 const wishListRoute = require("./routes/wishlist");
 const paymentRoute = require("./routes/payment");
+const cmsRoute = require("./routes/cms");
+
+// utilities
 const { connectDB } = require("./config/dbconnection");
 const {limiter} =  require("./config/ratelimit")
 
@@ -47,6 +50,7 @@ server.use("/api/auth", authRoute.router);
 server.use("/api/wishlist", wishListRoute.router);
 server.use("/api/cart", cartRoute.router);
 server.use("/api/payment", paymentRoute.router);
+server.use("/api/cms", cmsRoute.router);
 // server.use("/api/coupon", couponRoute.router)
 
 server.listen(process.env.PORT, () => {
