@@ -18,15 +18,20 @@ const transactionSchema = mongoose.Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    productId: {
-      type: String,
-    },
     amount: {
       type: Number,
     },
     totalAmount: {
       type: Number,
     },
+    orderId: {
+      type: Schema.Types.ObjectId,
+      ref: "Order"
+    },
+    taxAmount: {
+      type: Number,
+    }
+
   },
   { timestamps: true }
 );

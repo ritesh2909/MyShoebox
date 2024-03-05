@@ -1,0 +1,9 @@
+{
+  // image,
+  // searchName, for brand brandName, category -> categoryName, product -> title
+  // category, -> for brand category = brand, category, category = category, product, categopry = product
+}
+
+
+if clicked on product -> directly goes to product detail page
+if clicked on brand or category, -> goes to product list page with that thing selected

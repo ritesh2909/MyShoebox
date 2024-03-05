@@ -95,20 +95,6 @@ exports.getCartItems = async (req, res) => {
   }
 };
 
-exports.getCartItem = async (req, res) => {
-  let currentUser = res.user;
-  const cartItemId = req.params.cartItemId;
-  try {
-    const cartItem = await CartItem.findById(cartItemId);
-    if (!cartItem) {
-      return res.status(404).json("Cart item not found!");
-    }
-    return res.status(200).json(cartItem);
-  } catch (error) {
-    return res.status(500).json(error);
-  }
-};
-
 exports.moveToWishList = async (req, res) => {
   // const id = req.params.id;
   // const cartItem = await CartItem.findById(id);

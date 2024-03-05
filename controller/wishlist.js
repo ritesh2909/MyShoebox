@@ -1,6 +1,6 @@
 const { Product } = require("../model/Product");
 const { User } = require("../model/User");
-const { WishListItem } = require("../model/WishListItem");
+const { WishListItem, WishListStatus } = require("../model/WishListItem");
 const { ProductInfo } = require("../model/ProductInfo");
 const { CartItem } = require("../model/CartItem");
 
@@ -39,7 +39,7 @@ exports.addToWishList = async (req, res) => {
         size: size,
       });
       const savedNewWishListItem = await newWishListItem.save();
-      userInfo.wishList.push(savedNewWishListItem._id);
+      // userInfo.wishList.push(savedNewWishListItem._id);
       await userInfo.save();
     }
     return res.status(200).json("Product Added to wishlist!");
@@ -86,45 +86,37 @@ exports.removeFromWishList = async (req, res) => {
   }
 };
 
+
 exports.getWishListProducts = async (req, res) => {
   try {
     const currentUser = res.user;
     const userId = currentUser._id;
-    const userInfo = await User.findOne({ _id: userId });
     let products = [];
-    let wishList = await WishListItem.find({userId: userId});
+    let wishList = await WishListItem.find({ userId: userId, status: WishListStatus.ADDED });
+    wishList.sort((a,b)=> b.createdAt - a.createdAt)
     for (let wishListItem of wishList) {
-      const wishListDet = await WishListItem.findOne({
-        _id: wishListItem,
+      const productInfo = await ProductInfo.findOne({
+        _id: wishListItem.productInfoId
       });
-      if (wishListDet) {
-        const productDetail = await Product.findOne({
-          productId: wishListDet.productId,
-        });
-        const productInfo = await ProductInfo.findOne({
-          productId: wishListDet.productId,
-          color: wishListDet.color,
-          size: wishListDet.size,
-        });
-        const productVarients = await ProductInfo.find(
-          {
-            productId: wishListDet.productId,
-            color: wishListDet.color,
-          },
-          "size"
-        );
-        products.push({
-          wishListItem: wishListDet,
-          productDetail,
-          productInfo: productInfo,
-          varient: productVarients,
-        });
-      }
+
+      const productVarients = await ProductInfo.find(
+        {
+          productId: productInfo.productId,
+          color: productInfo.color,
+        },
+        "size"
+      );
+      products.push({
+        wishListItem: wishListItem,
+        productInfo: productInfo,
+        varient: productVarients,
+      });
+
     }
 
     return res
       .status(200)
-      .json({ products: products, productInfo: {}, count: products.length });
+      .json({ products: products, count: products.length });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
@@ -135,18 +127,10 @@ exports.moveToCart = async (req, res) => {
   const id = req.params.id;
   const wishListItem = await WishListItem.findById(id);
 
-  const product = await Product.findOne({ productId: wishListItem.productId });
-  if (!product) {
-    return res.status(404).json("Product not found!");
-  }
   if (!wishListItem) {
     return res.status(404).json("Wishlist item not found!");
   }
-  const productVarient = await ProductInfo.findOne({
-    productId: wishListItem.productId,
-    size: req.body.size,
-    color: req.body.color,
-  });
+  const productVarient = await ProductInfo.findById({ id: wishListItem.productInfoId })
 
   if (!productVarient) {
     return res.status(404).json("Product Unavailable!");
@@ -155,9 +139,7 @@ exports.moveToCart = async (req, res) => {
   try {
     const cartItem = await CartItem.findOne({
       userId: wishListItem.userId,
-      productId: wishListItem.productId,
-      size: req.body.size,
-      color: req.body.color,
+      productInfoId: productVarient.id
     });
 
     if (cartItem) {
@@ -169,10 +151,7 @@ exports.moveToCart = async (req, res) => {
       // create a new cart item and then procceed
       const newCartItem = new CartItem({
         userId: wishListItem.userId,
-        productId: wishListItem.productId,
-        size: req.body.size,
-        color: req.body.color,
-        quantity: 1,
+        productInfoId: productVarient.id
       });
       await newCartItem.save();
     }
@@ -194,11 +173,62 @@ exports.V2RemoveFromWishList = async (req, res) => {
   }
 
   try {
-    await WishListItem.findByIdAndDelete(itemId);
+    await WishListItem.findByIdAndUpdate(itemId, {
+      status: WishListStatus.REMOVED
+    });
     return res.status(204).json("Item removed from wishlist!");
   } catch (error) {
     return res.status(500).json(error);
   }
 };
 
-exports.getWishListProductsV2 = async (req, res) => {};
+exports.V2AddToWishlist = async (req, res) => {
+  try {
+    const productInfoId = req.params.productInfoId;
+    const currentUser = res.user;
+    const userId = currentUser._id;
+
+    const productInfo = await ProductInfo.findById(productInfoId);
+
+    if (!productInfo) {
+      return res.status(404).json("Product not found!");
+    }
+
+    const existingProduct = await WishListItem.find({ userId: userId, productInfoId: productInfo.id, status: WishListStatus.ADDED })
+    console.log(existingProduct);
+    if (existingProduct.length > 0) {
+      return res.status(200).json("Item already added to your wishlist!")
+    } else {
+      const newWishlistItem = new WishListItem({
+        userId: userId,
+        productInfoId: productInfoId,
+        status: WishListStatus.ADDED
+      })
+
+      await newWishlistItem.save();
+      return res.status(200).json("Item added to your wishlist!")
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json("Internal server error")
+  }
+
+}
+
+exports.UpdateSize = async (req, res) => {
+  const productInfoId = req.params.productInfoId;
+  const currentUser = res.user;
+  const userId = currentUser._id;
+
+  const productInfo = await ProductInfo.findById(productInfoId);
+
+  if (!productInfo) {
+    return res.status(404).json("Product not found!");
+  }
+
+  
+
+
+
+}
+

@@ -1,15 +1,28 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+
+const CartItemStatus = {
+  ADDED: 1,
+  REMOVED: 2,
+  MOVED_TO_WISHLIST: 3,
+}
+
 const cartItemSchema = new mongoose.Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User" },
-    productId: { type: String },
+    productInfoId: {
+      type: Schema.Types.ObjectId,
+      ref: "ProductInfo"
+    },
+    status: {
+      type: Number,
+      enum: Object.values(CartItemStatus),
+    },
     quantity: { type: Number },
-    size: { type: Number },
-    color: { type: String },
   },
   { timestamps: true }
 );
 
-exports.CartItem = mongoose.model("CartItem", cartItemSchema);
+const CartItem = mongoose.model("CartItem", cartItemSchema);
+module.exports = {CartItem};

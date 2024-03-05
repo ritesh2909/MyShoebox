@@ -6,6 +6,7 @@ const { Category } = require("../model/Category");
 const { Brand } = require("../model/Brand");
 const { ObjectId } = require("mongodb");
 const { sortingOptions } = require("../utils/utils");
+const { searchResponse } = require("./search")
 
 // api to add new products
 exports.addProduct = async (req, res) => {
@@ -410,7 +411,7 @@ const colorPipeline = [
 ];
 
 
-
+// products filters api
 exports.getProductFilters = async (req, res) => {
   try {
     // gender TODO for category and brand
@@ -457,7 +458,7 @@ const sortBasedOnSortingOption = (products, sortingOption) => {
       products.sort((a, b) => b.discountPrice - a.discountPrice);
       break;
     case Object.keys(sortingOptions).find(key => sortingOptions[key] === sortingOptions.PriceLowToHigh):
-      products.sort((a,b)=> a.discountPrice - b.discountPrice)
+      products.sort((a, b) => a.discountPrice - b.discountPrice)
     default:
       console.log("default case")
   }
@@ -465,6 +466,7 @@ const sortBasedOnSortingOption = (products, sortingOption) => {
   return products;
 }
 
+// main products list api
 exports.getProductsUsingFilters = async (req, res) => {
   // supposing gender will always be single 
   let { categories, brands, colors, gender, sortingOption } = req.body;
@@ -553,3 +555,17 @@ exports.getProductsUsingFilters = async (req, res) => {
     return res.status(500).json(error);
   }
 };
+
+exports.homeSearch = async (req, res) => {
+  try {
+    console.log("called")
+    const searchToken = req.query.query;
+    console.log(searchToken)
+    const searchRes = await searchResponse(searchToken);
+    console.log(searchRes);
+    return res.status(200).json(searchRes)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json(error)
+  }
+}

@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 
 
+
 const swaggerUi = require("swagger-ui-express");
 const swaggerOptions = require("./swagger.json");
 // routes
@@ -21,20 +22,21 @@ const cmsRoute = require("./routes/cms");
 const { connectDB } = require("./config/dbconnection");
 const {limiter} =  require("./config/ratelimit")
 
+const logger = require('./middlewares/logger');
+
 const cors = require("cors");
 const server = express();
-
+server.use(bodyParser.json());
+server.use(logger);
 
 dotenv.config();
-// server.use((req, res, next) => {
-//   console.log(`${req.method} ${req.originalUrl}`);
-//   next();
-// });
+
 server.use(express.json());
 server.use(cors());
-server.use(bodyParser.json());
 server.use(cookieParser());
-// server.use(limiter)
+
+
+
 
 // DB Connection
 connectDB();
@@ -52,6 +54,7 @@ server.use("/api/cart", cartRoute.router);
 server.use("/api/payment", paymentRoute.router);
 server.use("/api/cms", cmsRoute.router);
 // server.use("/api/coupon", couponRoute.router)
+
 
 server.listen(process.env.PORT, () => {
   console.log(`Server running on ${process.env.PORT}`);
