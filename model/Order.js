@@ -9,6 +9,7 @@ const OrderStatusEnum = {
   RETURN_REQUESTED: 5,
   CANCELL_REQUESTED: 6,
   DISPATCHED: 7,
+  PENDING: 8
 };
 
 const orderSchema = new Schema(

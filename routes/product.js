@@ -10,11 +10,13 @@ const {
   getProductFilters,
   V2YouMayAlsoLike,
   getProductInfo,
+  homeSearch,
   getProductsUsingFilters,
 } = require("../controller/product");
 
 const router = express.Router();
 
+router.get("/search", homeSearch);
 router.post("/products", getProductsUsingFilters);
 router.post("/filters", getProductFilters);
 router.post("/add", addProduct);
@@ -26,5 +28,6 @@ router.get("/productId/:productId", getProductByProductId);
 router.patch("/:id", updateProductById);
 router.get("/you-may-also-like/:productId", V2YouMayAlsoLike);
 router.post("/get-product-info", getProductInfo);
+
 
 exports.router = router;
