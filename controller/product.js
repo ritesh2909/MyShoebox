@@ -474,10 +474,7 @@ exports.getProductsUsingFilters = async (req, res) => {
     sortingOption = sortingOptions.Recommended;
   }
 
-  console.log(gender)
-  gender = ProductGenderEnum[gender.toUpperCase()];
-  console.log(gender)
-
+  
   let pipeline = [];
 
   if (brands && brands.length > 0) {
@@ -493,7 +490,7 @@ exports.getProductsUsingFilters = async (req, res) => {
   }
 
   if (gender) {
-    console.log("called gender")
+    gender = ProductGenderEnum[gender.toUpperCase()];
     pipeline.push({
       $match: {
         gender: gender,
