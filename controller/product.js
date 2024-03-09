@@ -1,4 +1,4 @@
-const { Product, ProductGenderEnum } = require("../model/Product");
+const { Product, ProductGenderEnum,ProductGenderEnumMatch } = require("../model/Product");
 const { ProductInfo } = require("../model/ProductInfo");
 const slugify = require("slugify");
 const { validateMongoDbId } = require("../utils/validateMongoId");
@@ -474,6 +474,10 @@ exports.getProductsUsingFilters = async (req, res) => {
     sortingOption = sortingOptions.Recommended;
   }
 
+  console.log(gender)
+  gender = ProductGenderEnum[gender.toUpperCase()];
+  console.log(gender)
+
   let pipeline = [];
 
   if (brands && brands.length > 0) {
@@ -489,9 +493,10 @@ exports.getProductsUsingFilters = async (req, res) => {
   }
 
   if (gender) {
+    console.log("called gender")
     pipeline.push({
       $match: {
-        gender: ProductGenderEnum[gender],
+        gender: gender,
       },
     });
   }
@@ -503,6 +508,8 @@ exports.getProductsUsingFilters = async (req, res) => {
       },
     });
   }
+  
+  console.log(pipeline[0])
 
   try {
     let result = [];
