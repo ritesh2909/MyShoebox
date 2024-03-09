@@ -14,6 +14,13 @@ const ProductGenderEnum = {
   GIRLS: 4,
 };
 
+const ProductGenderEnumMatch = {
+  "Men": "MEN",
+  "Women": "WOMEN",
+  "Kids": "KIDS",
+  "Girls": "GIRLS",
+}
+
 const productSchema = new mongoose.Schema(
   {
     brand: { type: Schema.Types.ObjectId, ref: "Brand" },
@@ -42,4 +49,4 @@ productSchema.pre("save", function (next) {
 });
 
 const Product = mongoose.model("Product", productSchema);
-module.exports = { Product, ProductAvailablityEnum, ProductGenderEnum };
+module.exports = { Product, ProductAvailablityEnum, ProductGenderEnum,ProductGenderEnumMatch };
