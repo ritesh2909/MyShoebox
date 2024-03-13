@@ -6,6 +6,7 @@ const CartItemStatus = {
   ADDED: 1,
   REMOVED: 2,
   MOVED_TO_WISHLIST: 3,
+  ORDERED: 4,
 }
 
 const cartItemSchema = new mongoose.Schema(
@@ -25,4 +26,4 @@ const cartItemSchema = new mongoose.Schema(
 );
 
 const CartItem = mongoose.model("CartItem", cartItemSchema);
-module.exports = {CartItem};
+module.exports = { CartItem, CartItemStatus };

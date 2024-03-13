@@ -12,13 +12,9 @@ const router = express.Router();
 
 router.patch("/v2/addtowishlist/:productInfoId", verifyToken, wishListController.V2AddToWishlist);
 
-
 router.get("/getwishlist", verifyToken, wishListController.getWishListProducts);
 
-router.patch(
-  "/v2/remove/:id",
-  verifyToken,
-  wishListController.V2RemoveFromWishList
+router.patch("/v2/remove/:id", verifyToken, wishListController.V2RemoveFromWishList
 );
 
 router.patch("/movetocart/:id", verifyToken, wishListController.moveToCart);
