@@ -1,95 +1,209 @@
-const { CartItem } = require("../model/CartItem");
+const { CartItem, CartItemStatus } = require("../model/CartItem");
+const { Discount, DiscountEntityEnum, DiscountStatusEnum } = require("../model/Discount");
 const { ProductInfo } = require("../model/ProductInfo");
-// const { WishListItem } = require("../model/WishListItem");
+const { Transaction } = require("../model/Transaction");
+const { getTaxAmount, getTotalAmount } = require("../utils/calculations")
+
 
 exports.addToCart = async (req, res) => {
   let currentUser = res.user;
-  const productId = req.body.productId;
-  const size = req.body.size;
-  const color = req.body.color;
+  const productInfoId = req.params.productInfoId;
+  const quantity = req.body.quantity;
 
   try {
-    if (!currentUser) {
-      return res.status(401).json("Unauthenticated!");
-    }
-    const product = await ProductInfo.findOne({
-      productId: productId,
-    });
-    if (!product) {
-      return res.status(404).json("Product not found!");
+    const productInfo = await ProductInfo.findById(productInfoId)
+    if (!productInfo) {
+      return res.status(404).json("product not found!")
     }
 
-    // if item already exists, then increase counter
-    const cartItemAlreadyExists = await CartItem.findOne({
-      productId: productId,
+    const transaction = await Transaction.findOne({
       userId: currentUser._id,
-      size: size,
-      color: color,
+      isCompleted: false
+    })
+
+    if (!transaction) {
+      return res.status(400).json("users transaction not found")
+    }
+
+    const existingCartItem = await CartItem.findOne({
+      user: currentUser._id,
+      productInfoId: productInfoId,
+      status: CartItemStatus.ADDED,
     });
 
-    if (!cartItemAlreadyExists) {
-      // creating a new cartitem
-      const newCartItem = new CartItem({
-        userId: currentUser._id,
-        productId: productId,
-        color: color,
-        size: size,
-        quantity: 1,
-      });
-      await newCartItem.save();
-    } else if (cartItemAlreadyExists && cartItemAlreadyExists.quantity < 5) {
-      await CartItem.findByIdAndUpdate(cartItemAlreadyExists, {
-        quantity: cartItemAlreadyExists.quantity + 1,
-      });
+    if (existingCartItem) {
+      // item already exists in the cart, increasing the number
+      existingCartItem.quantity = existingCartItem.quantity + quantity;
+      await existingCartItem.save();
     } else {
-      //case where we already have 5 quantity of this product
-      return res
-        .status(400)
-        .json("You have reached the maximum quantity of this product!");
+      // adding new item to cart
+      const newCartItem = await CartItem.create({
+        userId: currentUser._id,
+        productInfoId: productInfoId,
+        quantity: quantity,
+        status: CartItemStatus.ADDED
+      })
     }
-    return res.status(200).json("Product added to cart!");
+
+    for (let i = 0; i < quantity; i++) {
+      const _ = await Discount.create({
+        userId: currentUser._id,
+        transactionId: transaction._id,
+        amount: productInfo.price - productInfo.discountPrice,
+        entityType: DiscountEntityEnum.DISCOUNT,
+        entity_id: productInfoId,
+        discountStatus: DiscountStatusEnum.APPLIED
+      })
+    }
+
+
+
+    transaction.amount = transaction.amount + (productInfo.price * quantity);
+    await transaction.save();
+    transaction.taxAmount = await getTaxAmount(transaction._id);
+    await transaction.save()
+    transaction.totalAmount = await getTotalAmount(transaction._id);
+    await transaction.save();
+    return res.status(200).json("Product added to your cart")
   } catch (error) {
-    console.log(error);
-    return res.status(500).json(error);
+    console.log(error)
+    return res.status(500).json("Internal Server Error")
   }
 };
 
 exports.removeFromCart = async (req, res) => {
   let currentUser = res.user;
-  const cartItemId = req.params.cartItemId;
+  const productInfoId = req.params.productInfoId;
 
   try {
-    const cartItem = await CartItem.findOne({
-      _id: cartItemId,
-      userId: currentUser._id,
-    });
-    if (!cartItem) {
-      return res.status(404).json("Cart item not found!");
+    const productInfo = await ProductInfo.findById(productInfoId)
+    if (!productInfo) {
+      return res.status(404).json("product not found!")
     }
-    await CartItem.findByIdAndDelete(cartItemId);
-    return res.status(200).json("Cart item removed!");
+
+    const transaction = await Transaction.findOne({
+      userId: currentUser._id,
+      isCompleted: false
+    })
+
+    if (!transaction) {
+      return res.status(400).json("users transaction not found")
+    }
+
+    const cartItem = await CartItem.findOne({
+      userId: currentUser._id,
+      productInfoId: productInfoId,
+      status: CartItemStatus.ADDED,
+    })
+
+    if (cartItem.quantity == 1) {
+      // last item 
+      cartItem.status = CartItemStatus.REMOVED
+      await cartItem.save();
+    } else {
+      // have more items
+      cartItem.quantity--;
+      await cartItem.save();
+    }
+
+    await Discount.findOneAndUpdate({
+      userId: currentUser._id,
+      transactionId: transaction._id,
+      entity_id: productInfoId,
+      discountStatus: DiscountStatusEnum.APPLIED
+    }, {
+      discountStatus: DiscountStatusEnum.REMOVED
+    })
+
+    transaction.amount = transaction.amount - productInfo.price;
+    await transaction.save();
+    transaction.taxAmount = await getTaxAmount(transaction._id);
+    await transaction.save();
+    transaction.totalAmount = await getTotalAmount(transaction._id);
+
+    await transaction.save();
+    return res.status(200).json("Product removed from cart")
   } catch (error) {
     return res.status(500).json(error);
   }
 };
 
+// this will return 2 things cart items and transaction details, transaction details will be regenerated because of price volitility
 exports.getCartItems = async (req, res) => {
   let currentUser = res.user;
   try {
-    const cartItems = await CartItem.find({ userId: currentUser._id });
-    if (cartItems.length > 0) {
-      for (let item of cartItems) {
-        const productVarient = await ProductInfo.findOne({
-          productId: item.productId,
-          size: item.size,
-          color: item.color,
-        });
+    const cartItems = await CartItem.find({
+      userId: currentUser._id,
+      status: CartItemStatus.ADDED
+    })
 
-        Object.assign(item, productVarient);
+    if (cartItems.length == 0) {
+      return res.status(200).json({
+        cartItem: [],
+        transaction: {}
       }
+      )
     }
 
-    return res.status(200).json(cartItems);
+    let transaction = await Transaction.findOne({
+      userId: currentUser._id,
+      isCompleted: false
+    })
+    if (!transaction) {
+      console.log("transaction not found")
+    }
+
+    let amount = 0;
+    let graceAmount = 0;
+    for (let item of cartItems) {
+      let productInfo = await ProductInfo.findById(item.productInfoId)
+      amount += productInfo.amount;
+      graceAmount += productInfo.discountPrice;
+      Object.assign(item, { productInfo: productInfo })
+      const discount = await Discount.findOne({
+        userId: currentUser._id,
+        transactionId: transaction._id,
+        entity_id: productInfo._id,
+        entityType: DiscountEntityEnum.DISCOUNT
+      })
+      console.log(discount)
+
+      console.log(productInfo.price)
+      console.log(productInfo.discountPrice)
+
+      discount.amount = productInfo.price - productInfo.discountPrice
+      await discount.save();
+    }
+
+    transaction.amount = amount;
+    await transaction.save();
+    transaction.taxAmount = getTaxAmount(transaction._id);
+    await transaction.save();
+    transaction.totalAmount = getTotalAmount(transaction._id);
+
+    await transaction.save();
+
+    const pipeline = [
+      {
+        $match: { transactionId: transaction_id },
+      },
+      {
+        $group: {
+          _id: '$entityType',
+          totalAmount: { $sum: '$amount' }
+        }
+      }
+    ];
+
+    const discounts = await Discount.aggregate(pipeline);
+    Object.assign(transaction, { discounts: discounts })
+    const cartResponse = {
+      cartItem: cartItems,
+      transaction: transaction
+    }
+
+    return res.status(200).json(cartResponse);
+
   } catch (error) {
     return res.status(500).json(error);
   }

@@ -17,7 +17,7 @@ const discountSchema = new Schema(
   {
     discountStatus: {
       type: Number,
-      enum: Object.values[DiscountStatusEnum],
+      enum: Object.values(DiscountStatusEnum),
       default: DiscountStatusEnum.APPLIED
     },
     userId: {
@@ -30,9 +30,9 @@ const discountSchema = new Schema(
     amount: {
       type: Number
     },
-    entity_type: {
+    entityType: {
       type: Number,
-      enum: Object.values[DiscountEntityEnum],
+      enum: Object.values(DiscountEntityEnum),
     },
     entity_id: {
       type: Schema.Types.ObjectId

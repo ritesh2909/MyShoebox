@@ -225,10 +225,5 @@ exports.UpdateSize = async (req, res) => {
   if (!productInfo) {
     return res.status(404).json("Product not found!");
   }
-
-  
-
-
-
 }
 
