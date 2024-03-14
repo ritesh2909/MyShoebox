@@ -38,9 +38,6 @@ server.use(cookieParser());
 // DB Connection
 connectDB();
 
-// Serve Swagger UI at /api-docs
-server.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
-
 server.use("/api/products", productRoute.router);
 server.use("/api/brand", brandRoute.router);
 server.use("/api/category", categoryRoute.router);
