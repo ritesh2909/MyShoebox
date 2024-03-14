@@ -120,6 +120,7 @@ exports.requestOtp = async (req, res) => {
     user.passwordResetOtp = otpGenerated;
     (user.otpExpires = moment().add(10, "minutes")), await user.save();
     const otpBody = `${otpGenerated} is your OTP to login to ShoezBazaar. DO NOT share otp with anyone. SHOEZBAZAAR never ask for OTP. This otp expires in 10 mins.`;
+    console.log(otpBody)
     try {
       const token = await generateToken(user?._id);
       await User.findByIdAndUpdate(

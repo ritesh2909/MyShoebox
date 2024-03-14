@@ -135,7 +135,11 @@ exports.getCartItems = async (req, res) => {
     const cartItems = await CartItem.find({
       userId: currentUser._id,
       status: CartItemStatus.ADDED
-    })
+    }).populate({
+      path: 'productInfoId',
+      select: 'availabilityStatus title _id description productId color size quantity thumbnail price discountPrice rating'
+    });
+
 
     if (cartItems.length == 0) {
       return res.status(200).json({
@@ -157,54 +161,54 @@ exports.getCartItems = async (req, res) => {
     let graceAmount = 0;
     for (let item of cartItems) {
       let productInfo = await ProductInfo.findById(item.productInfoId)
-      amount += productInfo.amount;
+      amount += productInfo.price;
       graceAmount += productInfo.discountPrice;
-      Object.assign(item, { productInfo: productInfo })
       const discount = await Discount.findOne({
         userId: currentUser._id,
         transactionId: transaction._id,
         entity_id: productInfo._id,
         entityType: DiscountEntityEnum.DISCOUNT
       })
-      console.log(discount)
-
-      console.log(productInfo.price)
-      console.log(productInfo.discountPrice)
 
       discount.amount = productInfo.price - productInfo.discountPrice
       await discount.save();
     }
-
     transaction.amount = amount;
     await transaction.save();
-    transaction.taxAmount = getTaxAmount(transaction._id);
+    transaction.taxAmount = await getTaxAmount(transaction._id);
     await transaction.save();
-    transaction.totalAmount = getTotalAmount(transaction._id);
+    transaction.totalAmount = await getTotalAmount(transaction._id);
 
     await transaction.save();
 
     const pipeline = [
       {
-        $match: { transactionId: transaction_id },
+        $match: { transactionId: transaction._id, discountStatus: DiscountStatusEnum.APPLIED },
       },
       {
         $group: {
           _id: '$entityType',
-          totalAmount: { $sum: '$amount' }
+          totalAmount: { $sum: '$amount' },
+          entityType: {$first: '$entityType'},
         }
       }
     ];
 
     const discounts = await Discount.aggregate(pipeline);
-    Object.assign(transaction, { discounts: discounts })
+    const transactionWithDiscount = {
+      ...transaction._doc,
+      discounts: discounts
+    };
+    // console.log(discounts)
     const cartResponse = {
       cartItem: cartItems,
-      transaction: transaction
+      transaction: transactionWithDiscount
     }
 
     return res.status(200).json(cartResponse);
 
   } catch (error) {
+    console.log(error)
     return res.status(500).json(error);
   }
 };
