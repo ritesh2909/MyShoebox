@@ -3,10 +3,6 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 
-
-
-const swaggerUi = require("swagger-ui-express");
-const swaggerOptions = require("./swagger.json");
 // routes
 const productRoute = require("./routes/product");
 const brandRoute = require("./routes/brand");
