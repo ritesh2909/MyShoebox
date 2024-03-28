@@ -9,7 +9,7 @@ const OrderStatusEnum = {
   RETURN_REQUESTED: 5,
   CANCELL_REQUESTED: 6,
   DISPATCHED: 7,
-  PENDING: 8
+  PAYMENT_FAILED: 8
 };
 
 const orderSchema = new Schema(
@@ -19,18 +19,21 @@ const orderSchema = new Schema(
       enum: Object.values[OrderStatusEnum],
       default: OrderStatusEnum.ORDERED,
     },
+    orderId: { type: String },
     userId: { type: Schema.Types.ObjectId, ref: "User" },
-    productIds: [{ type: Schema.Types.ObjectId, ref: "Product" }],
     orderAmount: { type: Number },
-    isCouponApplied: { type: Boolean },
     deliveryAddress: { type: String },
     deliveryTime: { type: String }, // format of HH:MM
     orderDate: { type: Date },
-    orderTime: { type: String }, // format of HH:MM
     deliveryDate: { type: Date },
     instructions: { type: String },
+    transactionId: { type: Schema.Types.ObjectId, ref: "Transaction" },
   },
   { timestamps: true }
 );
 
-exports.Order = mongoose.model("Order", orderSchema);
+const Order = mongoose.model(
+  "Order", orderSchema
+);
+
+module.exports = { Order, OrderStatusEnum };

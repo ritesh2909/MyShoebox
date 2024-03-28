@@ -7,6 +7,7 @@ const CartItemStatus = {
   REMOVED: 2,
   MOVED_TO_WISHLIST: 3,
   ORDERED: 4,
+  PAYMENT_FAILED: 5,
 }
 
 const cartItemSchema = new mongoose.Schema(

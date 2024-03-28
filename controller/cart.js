@@ -16,13 +16,20 @@ exports.addToCart = async (req, res) => {
       return res.status(404).json("product not found!")
     }
 
-    const transaction = await Transaction.findOne({
+    let transaction = await Transaction.findOne({
       userId: currentUser._id,
       isCompleted: false
     })
 
     if (!transaction) {
-      return res.status(400).json("users transaction not found")
+      // creating a new transaction
+      transaction = await Transaction.create({
+        userId: currentUser._id,
+        amount: 0,
+        totalAmount: 0,
+        taxAmount: 0,
+        isCompleted: false
+      })
     }
 
     const existingCartItem = await CartItem.findOne({
@@ -128,7 +135,7 @@ exports.removeFromCart = async (req, res) => {
   }
 };
 
-// this will return 2 things cart items and transaction details, transaction details will be regenerated because of price volitility
+// this will return 2 things cart items and transaction details, transaction details will be regenerated again because of price volitility
 exports.getCartItems = async (req, res) => {
   let currentUser = res.user;
   try {
@@ -154,7 +161,14 @@ exports.getCartItems = async (req, res) => {
       isCompleted: false
     })
     if (!transaction) {
-      console.log("transaction not found")
+      // creating a new transaction
+      transaction = await Transaction.create({
+        userId: currentUser._id,
+        amount: 0,
+        totalAmount: 0,
+        taxAmount: 0,
+        isCompleted: false
+      })
     }
 
     let amount = 0;
@@ -189,7 +203,7 @@ exports.getCartItems = async (req, res) => {
         $group: {
           _id: '$entityType',
           totalAmount: { $sum: '$amount' },
-          entityType: {$first: '$entityType'},
+          entityType: { $first: '$entityType' },
         }
       }
     ];
