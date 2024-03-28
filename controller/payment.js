@@ -1,8 +1,13 @@
 const Stripe = require("stripe");
+const { successOrder, failedOrder } = require("./order")
+function roundToTwoDecimals(num) {
+  return Math.round((num + Number.EPSILON) * 100) / 100;
+}
 
 exports.createPayment = async (req, res) => {
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
   const { amount } = req.body;
+  let roundedAmount = roundToTwoDecimals(amount * 100);
   const environment = process.env.ENVIRONMENT;
   let successUrl, cancelUrl;
 
@@ -23,7 +28,7 @@ exports.createPayment = async (req, res) => {
           product_data: {
             name: "Payment",
           },
-          unit_amount: amount * 100,
+          unit_amount: roundedAmount,
         },
         quantity: 1,
       },
@@ -34,4 +39,23 @@ exports.createPayment = async (req, res) => {
   });
 
   res.json({ id: session.id });
+};
+
+
+exports.stripeWebhook = async (req, res) => {
+  const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+  const sessionId = req.query.session_id;
+  console.log(sessionId)
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === 'paid') {
+      console.log("payment success")
+    } else {
+      // await failedOrder();
+      console.log("payment failed")
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json("Internal Serevr Error")
+  }
 };
