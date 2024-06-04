@@ -13,6 +13,7 @@ const cartRoute = require("./routes/cart");
 const wishListRoute = require("./routes/wishlist");
 const paymentRoute = require("./routes/payment");
 const cmsRoute = require("./routes/cms");
+const geoLocationRoute = require("./routes/geolocation.js");
 
 
 // utilities
@@ -47,6 +48,7 @@ server.use("/api/wishlist", wishListRoute.router);
 server.use("/api/cart", cartRoute.router);
 server.use("/api/payment", paymentRoute.router);
 server.use("/api/cms", cmsRoute.router);
+server.use("/api/location", geoLocationRoute.router);
 // server.use("/api/coupon", couponRoute.router)
 
 
