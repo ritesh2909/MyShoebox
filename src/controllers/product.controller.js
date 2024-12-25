@@ -562,11 +562,8 @@ export const getProductsUsingFilters = async (req, res) => {
 
 export const homeSearch = async (req, res) => {
   try {
-    console.log("called")
     const searchToken = req.query.query;
-    console.log(searchToken)
     const searchRes = await searchResponse(searchToken);
-    console.log(searchRes);
     return res.status(200).json(searchRes)
   } catch (error) {
     console.log(error)
