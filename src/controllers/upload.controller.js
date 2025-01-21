@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
 import BullMQ, { tryCatch } from "bullmq";
-import { sendMessage } from '../kafka/kafka.producer.js';
+import { sendMessage } from '../kafka/producer.kafka.js';
 
 export const initializeUpload = async (req, res) => {
   try {

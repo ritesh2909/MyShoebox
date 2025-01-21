@@ -1,12 +1,8 @@
-import { Kafka, Partitioners } from 'kafkajs';
+import { Kafka } from 'kafkajs';
 
 const kafka = new Kafka({
-  clientId: 'myshoebox-media',
+  clientId: 'myshoebox',
   brokers: ['localhost:9092'],
 });
-
-const producer = kafka.producer({
-  createPartitioner: Partitioners.LegacyPartitioner
-})
 
 export default kafka;
