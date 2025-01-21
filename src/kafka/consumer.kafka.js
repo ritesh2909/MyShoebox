@@ -1,13 +1,12 @@
 import kafka from "../config/kafkaConfig.js";
 
-const consumer = kafka.consumer({ groupId: "myshoebox-media-group" });
-
 const runConsumer = async () => {
   try {
+    const consumer = kafka.consumer({ groupId: "myshoebox-group1" });
     await consumer.connect();
     console.log("Consumer connected to Kafka");
 
-    await consumer.subscribe({ topic: "test", fromBeginning: true });
+    await consumer.subscribe({ topic: "media", fromBeginning: true });
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
