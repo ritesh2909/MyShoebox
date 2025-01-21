@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
-import BullMQ from "bullmq";
-
+import BullMQ, { tryCatch } from "bullmq";
+import { sendMessage } from '../kafka/kafka.producer.js';
 
 export const initializeUpload = async (req, res) => {
   try {
@@ -68,4 +68,15 @@ export const handleFileUpload = async (req, res) => {
     return res.status(500).json("Error uplaoding file")
   }
 };
+
+export const sendMessageFromClient = async(req, res) =>{
+  try {
+    const message = req.body.message;
+    sendMessage(message);
+    return res.status(200).json("Message sent!");
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json(error)
+  }
+}
 
