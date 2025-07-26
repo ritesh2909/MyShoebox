@@ -20,7 +20,7 @@ import connectDB from "./config/dbconnection.js";
 import limiter from "./config/ratelimit.js";
 import logger from './middlewares/logger.middleware.js';
 import cors from "cors";
-import runConsumer from "./kafka/consumer.kafka.js";
+// import runConsumer from "./kafka/consumer.kafka.js";
 
 const server = express();
 server.use(express.json());
@@ -34,7 +34,7 @@ server.use(cookieParser());
 // DB Connection
 connectDB();
 
-runConsumer();
+// runConsumer();
 
 server.use("/api/products", productRoute);
 server.use("/api/upload", uploadRoute);
