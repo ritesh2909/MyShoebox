@@ -45,6 +45,7 @@ server.use("/api/auth", authRoute);
 server.use("/api/wishlist", wishlistRoute);
 server.use("/api/cart", cartRoute);
 server.use("/api/payment", paymentRoute);
+
 server.use("/api/cms", cmsRoute);
 server.use("/api/location", geoLocationRoute);
 
