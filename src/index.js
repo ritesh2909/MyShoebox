@@ -53,8 +53,9 @@ server.use("/api/cms", cmsRoute);
 server.use("/api/location", geoLocationRoute);
 
 const options = {
-  key: fs.readFileSync(path.resolve('src/cert/server.key')),
-  cert: fs.readFileSync(path.resolve('src/cert/server.cert'))
+  key: fs.readFileSync(path.resolve('../server.key')),
+  cert: fs.readFileSync(path.resolve('../server.cert'))
+
 };
 
 
