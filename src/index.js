@@ -45,10 +45,11 @@ server.use("/api/auth", authRoute);
 server.use("/api/wishlist", wishlistRoute);
 server.use("/api/cart", cartRoute);
 server.use("/api/payment", paymentRoute);
+
 server.use("/api/cms", cmsRoute);
 server.use("/api/location", geoLocationRoute);
 
 
-server.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, '0.0.0.0',() => {
   console.log(`Server running on ${process.env.PORT}`);
 });
