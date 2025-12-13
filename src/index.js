@@ -1,9 +1,6 @@
 import express from "express";
 import { config } from "dotenv";
 import cookieParser from "cookie-parser";
-import fs from "fs";
-import path from 'path';
-import https from "https";
 
 // routes
 import productRoute from './routes/product.route.js';
@@ -52,13 +49,7 @@ server.use("/api/payment", paymentRoute);
 server.use("/api/cms", cmsRoute);
 server.use("/api/location", geoLocationRoute);
 
-const options = {
-  key: fs.readFileSync(path.resolve('../server.key')),
-  cert: fs.readFileSync(path.resolve('../server.cert'))
 
-};
-
-
-https.createServer(options, server).listen(process.env.PORT || 8000, '0.0.0.0', () => {
-  console.log(`✅ HTTPS Server running on port ${process.env.PORT || 8000}`);
+server.listen(process.env.PORT, '0.0.0.0',() => {
+  console.log(`Server running on ${process.env.PORT}`);
 });
